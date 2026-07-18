@@ -68,6 +68,8 @@ svg{width:100%;height:100%}
 .tscale-btn:hover{color:var(--accent);border-color:var(--accent)}
 #detail-close{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:11px;padding:3px 8px;cursor:pointer;flex-shrink:0;margin-top:2px;transition:color .15s,border-color .15s}
 #detail-close:hover{color:var(--text);border-color:var(--accent)}
+#source-close{background:none;border:1px solid var(--border);border-radius:4px;color:var(--muted);font-size:11px;padding:3px 8px;cursor:pointer;flex-shrink:0;transition:color .15s,border-color .15s}
+#source-close:hover{color:var(--text);border-color:var(--accent)}
 #detail-title-wrap{flex:1;min-width:0}
 #detail-label{font-family:'Sora',sans-serif;font-size:calc(16px * var(--tscale,1));font-weight:700;color:var(--text);line-height:1.35;word-break:break-word}
 #detail-body{flex:1;overflow-y:auto;padding:0}
@@ -341,9 +343,10 @@ svg{width:100%;height:100%}
             <button id="source-back" onclick="closeSourcePanel()">← Back</button>
             <div class="header-controls-right">
               <div id="source-text-controls">
-                <button class="tscale-btn" onclick="adjustDetailTextSize(-1)" title="Smaller text">A−</button>
+                <button class="tscale-btn" onclick="adjustDetailTextSize(-1)" title="Smaller text">A&minus;</button>
                 <button class="tscale-btn" onclick="adjustDetailTextSize(1)" title="Larger text">A+</button>
               </div>
+              <button id="source-close" onclick="closeDetail()">&#10005; close</button>
             </div>
           </div>
           <div id="source-title"></div>
