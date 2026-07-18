@@ -164,15 +164,67 @@ svg{width:100%;height:100%}
 .nav-help-def{font-size:calc(13px * var(--nav-help-tscale,1));line-height:1.65;color:var(--text)}
 .nav-help-subsection{margin-top:12px;margin-left:16px;padding-left:12px;border-left:2px solid var(--border)}
 .nav-help-subterm{font-size:calc(12.5px * var(--nav-help-tscale,1))}
+
+/* ============ Mobile layout ============
+   Below 860px there isn't room for a 300px sidebar + 400px detail panel
+   alongside the graph, so both become full-height overlays (position:fixed,
+   slid in/out) instead of permanent flex columns. The canvas automatically
+   gets the freed-up space since fixed-position elements leave the flex flow.
+   selectNode()/closeDetail() and the existing .open toggle are untouched —
+   this is purely a positioning change, not a behavior change. */
+#mobile-menu-btn{display:none}
+#sidebar-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:75}
+#sidebar-backdrop.open{display:block}
+
+@media (max-width:860px){
+  header{padding:8px 12px 6px;gap:8px}
+  header h1{font-size:12.5px;line-height:1.35}
+  .logo-mark{height:26px}
+  .stats{gap:10px;font-size:11px}
+  #nav-help-btn{font-size:10px;padding:5px 7px}
+
+  #mobile-menu-btn{
+    display:flex;align-items:center;justify-content:center;
+    width:32px;height:32px;flex-shrink:0;
+    background:var(--surf);border:1px solid var(--border);border-radius:5px;
+    color:var(--text);font-size:16px;cursor:pointer
+  }
+  #mobile-menu-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+  #sidebar{
+    position:fixed;top:0;left:0;bottom:0;z-index:80;
+    width:86vw;max-width:340px;
+    transform:translateX(-100%);
+    transition:transform .25s ease;
+    box-shadow:10px 0 34px rgba(0,0,0,.5)
+  }
+  #sidebar.mobile-open{transform:translateX(0)}
+
+  #detail{
+    position:fixed;inset:0;width:100%;z-index:90
+  }
+
+  #controls{top:auto;bottom:12px;right:8px;gap:5px}
+  .ctrl-btn{font-size:11px;padding:7px 10px}
+
+  #legend{left:8px;bottom:12px;padding:8px 10px;font-size:10px;max-width:56vw}
+  #legend .legend-row{margin-bottom:4px;gap:6px}
+  #legend>div:last-child{display:none}
+
+  #detail-label{font-size:calc(15px * var(--tscale,1))}
+  #nav-help-modal{max-width:92vw;max-height:80vh}
+}
 </style>
 </head>
 <body>
 <header>
+  <button id="mobile-menu-btn" onclick="toggleMobileSidebar()" aria-label="Open menu">☰</button>
   <img class="logo-mark" src="data:image/png;base64,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" alt="" aria-hidden="true">
   <h1>CRYSTAL: A structured knowledge pipeline for scientific discovery</h1>
   <div class="stats" id="stats"></div>
 </header>
 <div class="main">
+  <div id="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
   <div id="sidebar">
     <div class="sidebar-zoom-row">
       <button id="nav-help-btn" onclick="openNavHelp()">Navigation Guide</button>
@@ -1443,7 +1495,18 @@ let navHistory=[],navForward=[],currentNodeId=null,recentHistory=[];
    opening a new node's detail always closes the source-panel with no
    memory of what it had been showing. */
 let currentSourcePanelCall=null;
+function toggleMobileSidebar(){
+  const sb=document.getElementById('sidebar');
+  const bd=document.getElementById('sidebar-backdrop');
+  const open=sb.classList.toggle('mobile-open');
+  bd.classList.toggle('open',open);
+}
+function closeMobileSidebar(){
+  document.getElementById('sidebar').classList.remove('mobile-open');
+  document.getElementById('sidebar-backdrop').classList.remove('open');
+}
 function selectNode(id,fromBack,fromForward){
+  closeMobileSidebar();
   let node=nodeMap.get(id);
   let kind='graph';
   if(!node&&SOURCE_CITATIONS[id]){
