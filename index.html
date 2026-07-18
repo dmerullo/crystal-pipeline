@@ -137,7 +137,8 @@
     margin-top:26px;
     line-height:1.85;
   }
-  .hero .cta-row{ display:flex; gap:16px; margin-top:40px; flex-wrap:wrap; }
+  .cta-row{ display:flex; gap:16px; flex-wrap:wrap; }
+  .hero .cta-row{ margin-top:40px; }
   .btn{
     font-family:'DM Mono', monospace;
     font-weight:400;
@@ -632,10 +633,13 @@
   <div class="wrap">
     <div class="section-head">
       <p class="eyebrow">see it run</p>
-      <h2>The interactive graph, live.</h2>
-      <p>The static diagrams above are a sketch. The real output is an explorable graph — zoom into a cluster, click a node for its evidence trail, filter by pass or by corpus.</p>
+      <h2>The interactive graphs, live.</h2>
+      <p>View a fully explorable graph — zoom into a cluster, click a node for its evidence trail, see all extracted characteristics and relationships. Two domains, same pipeline.</p>
     </div>
-    <a class="btn btn-primary" href="./demo/">Open the interactive demo →</a>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://dmerullo.github.io/crystal-pipeline/graphs/science.html">Explore the science graph →</a>
+      <a class="btn btn-ghost" href="https://dmerullo.github.io/crystal-pipeline/graphs/fiction.html">Explore the fiction graph →</a>
+    </div>
   </div>
 </section>
 
