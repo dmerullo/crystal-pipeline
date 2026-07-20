@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8">
+<title>Structurally Notable Entities</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap');
+:root{
+  --bg:#07080f;--surf:#10111c;--surf2:#161720;--border:#20212e;
+  --text:#dce2ea;--muted:#56547a;--accent:#4a9ee8;
+  --gap:#e0567a;--lit:#3fbf8f;--warn:#e8b84a;
+  --tscale:1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:calc(13px * var(--tscale,1));line-height:1.6;padding:0 0 60px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+header{background:var(--surf);border-bottom:1px solid var(--border);padding:28px 40px 24px;max-width:780px;margin:0 auto}
+.brand-row{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.logo-mark{height:36px;width:auto;flex-shrink:0}
+.brand-title{font-family:'Sora',sans-serif;font-size:calc(13px * var(--tscale,1));font-weight:800;letter-spacing:-.01em;color:var(--text);flex:1}
+.zoom-controls{display:flex;gap:4px;flex-shrink:0}
+.zoom-btn{background:var(--surf2);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:4px 10px;font-size:calc(11px * var(--tscale,1));cursor:pointer;font-family:'DM Mono',monospace;transition:color .15s,border-color .15s}
+.header-eyebrow{font-size:calc(9px * var(--tscale,1));letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.header-title{font-family:'DM Mono',monospace;font-size:calc(14px * var(--tscale,1));font-weight:400;color:var(--text);margin-bottom:16px;line-height:1.7;max-width:820px}
+
+.notice{max-width:780px;margin:20px auto;padding:10px 16px;border-left:3px solid var(--warn);background:rgba(201,176,126,.06);font-size:calc(10px * var(--tscale,1));color:var(--muted);border-radius:0 4px 4px 0}
+.notice strong{color:var(--warn)}
+
+.candidates{max-width:860px;margin:24px auto;padding:0 40px}
+.candidate{background:var(--surf);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:16px}
+.cand-title{font-family:'Sora',sans-serif;font-size:calc(16px * var(--tscale,1));font-weight:700;color:var(--accent);margin-bottom:12px}
+.readable{font-size:calc(13px * var(--tscale,1));margin-bottom:14px}
+.technical-label{font-size:calc(9px * var(--tscale,1));text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:6px;border-top:1px solid var(--border);padding-top:12px}
+.dev{font-size:calc(11px * var(--tscale,1));color:var(--muted);margin-bottom:8px}
+.dev strong{color:var(--text);font-weight:500}
+</style></head>
+<body>
+<header>
+  <div class="brand-row">
+    <svg class="logo-mark" viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><polygon points="50,3 2,35 50,35" fill="#3d74ad"/><polygon points="50,3 50,35 98,35" fill="#eef4fb"/><polygon points="2,35 50,35 50,67" fill="#8fb8e0"/><polygon points="50,35 98,35 50,67" fill="#244b78"/><polygon points="50,3 2,35 50,67 98,35" fill="none" stroke="#16324f" stroke-width="1.4" stroke-linejoin="round"/><line x1="50" y1="3" x2="50" y2="67" stroke="#16324f" stroke-width="1" stroke-opacity="0.55"/><line x1="2" y1="35" x2="98" y2="35" stroke="#16324f" stroke-width="1" stroke-opacity="0.55"/></svg>
+    <div class="brand-title">CRYSTAL: A structured knowledge pipeline for scientific discovery</div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="adjustZoom(-1)">A−</button>
+      <button class="zoom-btn" onclick="adjustZoom(1)">A+</button>
+    </div>
+  </div>
+  <div class="header-eyebrow">Crystal Pipeline · Structural Inversion Report</div>
+  <div class="header-title">Identify entities whose deviation from an archetype's invariant pattern was judged a genuine structural inversion — not a minor variation — in two or more independently-corroborated archetypes at once.</div>
+</header>
+
+<div class="notice">
+  <strong>Verification note</strong> — Inversion judgments are grounded only in archetype and entity
+  data already verified in earlier passes (invariant forces/constraints, each member's own unique
+  terms, deviation notes). The LLM scores and explains deviations already present in that data; it
+  does not generate new structural claims.
+</div>
+
+<div class="candidates">
+
+        <div class="candidate">
+          <h2 class="cand-title">Tidus</h2>
+          <p class="readable">Tidus inverts one of the most basic assumptions shared by several common arc patterns: that the person who completes the mission gets to survive it. Because his existence is contingent on the fayth's dream, winning — defeating Sin, resolving his conflict with Jecht, fulfilling his protective role toward Yuna — is precisely what ends him. This touches three separate structural patterns at once: the protector who normally persists through the arc, the figure who resolves a fraught paternal legacy and moves forward, and the self-sacrificing hero whose terminal act is understood as a choice. In Tidus's case, the sacrifice isn't chosen in any meaningful sense; it's baked into the ontological terms of his existence, which means the agency that the self-sacrifice pattern depends on simply isn't there. All three deviations point to the same underlying fact: his disappearance upon victory is structurally predetermined, not elected.</p>
+          <div class="technical-label">Technical basis (3 archetypes)</div>
+          <div class="dev"><strong>Protective Loyalty as Primary Driving Force</strong> — axis: persistence of the protective agent through arc resolution. <em>(inverting terms: existence_contingent_on_fayth_dream, disappearance_upon_victory)</em> The invariant pattern assumes the protective agent persists through the arc; existence_contingent_on_fayth_dream and disappearance_upon_victory together mean that fulfilling the protective mission is precisely what terminates the protector's existence, inverting the persistence assumption.</div>
+          <div class="dev"><strong>Protective Self-Sacrifice Terminal Action Pattern</strong> — axis: voluntariness and agency of self-sacrifice. <em>(inverting terms: existence_contingent_on_fayth_dream, disappearance_upon_victory)</em> The invariant pattern implies a chosen terminal act; existence_contingent_on_fayth_dream and disappearance_upon_victory together mean the sacrifice is structurally predetermined by ontological constraint rather than chosen, inverting the agency axis of the self-sacrifice pattern.</div><div class="dev"><strong>Paternal Legacy Conflict and Reorientation</strong> — axis: persistence of the agent through paternal legacy resolution. <em>(inverting terms: disappearance_upon_victory, existence_contingent_on_fayth_dream)</em> The invariant pattern assumes the agent persists through and beyond paternal legacy resolution; existence_contingent_on_fayth_dream and disappearance_upon_victory together mean that resolving the paternal conflict (defeating Jecht/Sin) terminates the agent's existence, inverting the persistence-through-resolution assumption of the archetype.</div>
+        </div>
+        <div class="candidate">
+          <h2 class="cand-title">Auron</h2>
+          <p class="readable">What makes Auron structurally unusual is that his protective loyalty — the defining force of his arc — cannot actually be carried out by him directly. Because he remains in the world as an unsent, his existence is ontologically constrained in a way that displaces the execution of his protective mission onto his successors; he can guide and witness, but the work must ultimately be done by others. This same condition inverts a second familiar pattern: where characters who withdraw into guilt-driven isolation typically choose that withdrawal and find their own way back out of it, Auron's isolation isn't a choice at all — it's a consequence of what he is — and his release from it depends entirely on whether those successors succeed. Both deviations stem from the same root fact: he is a dead man who hasn't yet passed on, which structurally removes him from the role of direct agent in his own story's resolution.</p>
+          <div class="technical-label">Technical basis (2 archetypes)</div>
+          <div class="dev"><strong>Protective Loyalty as Primary Driving Force</strong> — axis: agency of protective loyalty execution. <em>(inverting terms: unsent_binding_to_realm, resolution_contingent_on_successors, proxy_agency_transfer)</em> The invariant pattern assumes a living agent directly enacting protective loyalty; Auron's combination of unsent_binding_to_realm, proxy_agency_transfer, and resolution_contingent_on_successors means protective loyalty cannot be directly enacted by the protector — agency is structurally displaced onto successors, inverting the direct-agent assumption of the archetype.</div>
+          <div class="dev"><strong>Guilt-Bound Isolation to Active Engagement Transition</strong> — axis: nature of isolation (chosen vs. ontological) and locus of resolution agency. <em>(inverting terms: unsent_binding_to_realm, resolution_contingent_on_successors)</em> The invariant pattern assumes isolation is chosen and resolution is self-determined; unsent_binding_to_realm means isolation is ontological rather than chosen, and resolution_contingent_on_successors means resolution agency is externally located rather than self-enacted — both axes of the archetype are inverted simultaneously.</div>
+        </div>
+        <div class="candidate">
+          <h2 class="cand-title">Zidane</h2>
+          <p class="readable">Zidane's arc contains two related but distinguishable structural surprises. The first is that the protector role he occupies — stable and outward-directed for most of the story — collapses at its midpoint when he learns the truth of his origin, and he briefly becomes the one who needs protecting rather than the one providing it. The second is that this origin revelation, rather than moving him toward self-grounding as such revelations typically do, first produces a deep despair and a collapse of agency before resilience eventually reasserts itself. These two deviations are connected: it's specifically the content of what he learns — that he was created as an instrument of someone else's agenda — that both destabilizes his protective agency and inverts the usual emotional trajectory of identity revelation. The revelation doesn't clarify who he is so much as it temporarily unmakes the self he'd been operating from.</p>
+          <div class="technical-label">Technical basis (2 archetypes)</div>
+          <div class="dev"><strong>Protective Loyalty as Primary Driving Force</strong> — axis: directionality of protective agency (protector vs. protected). <em>(inverting terms: deep_despair_upon_true_origin_revelation, created_as_instrument_of_external_agenda)</em> The deviation notes confirm that at arc midpoint the protector becomes the protected; created_as_instrument_of_external_agenda and deep_despair_upon_true_origin_revelation together explain the mechanism — origin revelation collapses Zidane's protective agency, inverting the protector/protected axis that the invariant pattern assumes is stable.</div>
+          <div class="dev"><strong>False Inherited Identity with Revelation Arc</strong> — axis: immediate affective outcome of identity revelation. <em>(inverting terms: deep_despair_upon_true_origin_revelation, created_as_instrument_of_external_agenda)</em> The invariant pattern assumes revelation moves toward resolution or self-grounding; created_as_instrument_of_external_agenda and deep_despair_upon_true_origin_revelation together mean revelation first produces collapse rather than resolution — the immediate outcome of the revelation axis is inverted before resilience eventually restores agency.</div>
+        </div>
+        <div class="candidate">
+          <h2 class="cand-title">Kimahri</h2>
+          <p class="readable">Kimahri deviates from two patterns in ways that are related in tone but distinct in mechanism. Where characters driven by a revenge-origin trauma typically resolve that drive through some form of reflective reorientation — coming to see past the need for revenge — Kimahri's resolution is combat-gated: he has to actually defeat Biran and Yenke to move forward, meaning the revenge drive is fulfilled rather than revised. Separately, where characters with suppressed emotional expression are usually shown gradually opening up over the course of a story, Kimahri's taciturn exterior is dispositionally entrenched rather than thawing, and when emotion does surface it comes out explosively rather than incrementally. These are two distinct facts about him — one about how his past grievance gets resolved, the other about how his emotional life is structured — that together paint a portrait of someone whose inner world operates through pressure and release rather than gradual processing.</p>
+          <div class="technical-label">Technical basis (2 archetypes)</div>
+          <div class="dev"><strong>Trauma-Origin Revenge Drive with Motivational Revision</strong> — axis: mode of revenge drive resolution. <em>(inverting term: victory_over_Biran_and_Yenke_required_to_continue_mission)</em> The invariant pattern implies motivational revision (reflective reorientation away from revenge); victory_over_Biran_and_Yenke_required_to_continue_mission means resolution is combat-gated rather than reflective — the revenge drive is fulfilled through direct victory rather than revised, inverting the motivational-revision axis.</div>
+          <div class="dev"><strong>Suppressed Emotional Expression with Gradual Surfacing</strong> — axis: mode of emotional surfacing (gradual vs. explosive). <em>(inverting term: taciturn_exterior_limits_relational_accessibility)</em> The invariant pattern assumes gradual surfacing; taciturn_exterior_limits_relational_accessibility combined with the deviation note that expression when it occurs is explosive rather than gradual inverts the gradual-progression axis of the archetype — suppression is dispositionally entrenched and release is non-gradual.</div>
+        </div>
+</div>
+
+<script>
+let zoomStep=2;
+const zoomScales=[0.85,0.92,1.0,1.15,1.3];
+function adjustZoom(dir){
+  zoomStep=Math.max(0,Math.min(zoomScales.length-1,zoomStep+dir));
+  document.documentElement.style.setProperty('--tscale',zoomScales[zoomStep]);
+}
+</script>
+</body></html>

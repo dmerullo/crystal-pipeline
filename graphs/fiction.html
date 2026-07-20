@@ -18,7 +18,10 @@ header .sub{font-size:9px;color:var(--muted);letter-spacing:.12em;text-transform
 .brand-link{display:contents;text-decoration:none;color:inherit;cursor:pointer}
 .brand-link:hover h1{color:var(--accent)}
 .brand-link:hover .logo-mark{filter:brightness(1.15)}
-.stats{margin-left:auto;display:flex;gap:20px;font-size:14px;color:var(--muted)}
+.header-right{margin-left:auto;display:flex;align-items:center;gap:20px}
+.stats{display:flex;gap:20px;font-size:14px;color:var(--muted)}
+.insight-report-link{background:var(--surf);border:1px solid var(--border);border-radius:4px;color:var(--accent);font-family:'DM Mono',monospace;font-size:12px;font-weight:600;padding:5px 10px;text-decoration:none;white-space:nowrap;transition:border-color .15s,background .15s}
+.insight-report-link:hover{border-color:var(--accent);background:var(--surf2);text-decoration:none}
 #nav-help-btn{background:var(--surf);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:calc(10px * var(--sidebar-tscale,1));font-weight:600;padding:5px 8px;cursor:pointer;transition:border-color .15s,color .15s;white-space:nowrap}
 #method-help-btn{background:var(--surf);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:'DM Mono',monospace;font-size:calc(10px * var(--sidebar-tscale,1));font-weight:600;padding:5px 8px;cursor:pointer;transition:border-color .15s,color .15s;white-space:nowrap}
 #nav-help-btn:hover,#method-help-btn:hover{border-color:var(--accent);color:var(--accent)}
@@ -252,7 +255,10 @@ svg{width:100%;height:100%}
     <svg class="logo-mark" viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><polygon points="50,3 2,35 50,35" fill="#3d74ad"/><polygon points="50,3 50,35 98,35" fill="#eef4fb"/><polygon points="2,35 50,35 50,67" fill="#8fb8e0"/><polygon points="50,35 98,35 50,67" fill="#244b78"/><polygon points="50,3 2,35 50,67 98,35" fill="none" stroke="#16324f" stroke-width="1.4" stroke-linejoin="round"/><line x1="50" y1="3" x2="50" y2="67" stroke="#16324f" stroke-width="1" stroke-opacity="0.55"/><line x1="2" y1="35" x2="98" y2="35" stroke="#16324f" stroke-width="1" stroke-opacity="0.55"/></svg>
     <h1>CRYSTAL: A structured knowledge pipeline for scientific discovery</h1>
   </a>
-  <div class="stats" id="stats"></div>
+  <div class="header-right">
+    <a class="insight-report-link" href="https://dmerullo.github.io/crystal-pipeline/reports/fiction.html" target="_blank" rel="noopener noreferrer">&#8599; Insight Report</a>
+    <div class="stats" id="stats"></div>
+  </div>
 </header>
 <div class="main">
   <div id="sidebar-backdrop" onclick="closeMobileSidebar()"></div>
@@ -1232,8 +1238,8 @@ function renderArchetypeDetail(body,d){
   html+=sec('Constraints',
     `<div class="section-note" style="font-size:calc(10px * var(--tscale,1));color:var(--muted);margin-bottom:6px">Everything that appears anywhere among this cluster's members, including the invariant set above — not a claim that everyone shares it, just what's actually here.</div>${archTermTagsCollapsible(allConstraints,'constraint','constraint')}`);
 
-  if(d.transitions&&d.transitions.length)
-    html+=sec('State transitions',archTransitionTags(d.transitions));
+  html+=sec('State Transitions',`<div class="section-note" style="font-size:calc(10px * var(--tscale,1));color:var(--muted);margin-bottom:6px">${(d.transitions&&d.transitions.length)?"The exact same full sequence of states, confirmed present in every member's own data — not just the same start and end point.":"Checked and confirmed empty: no single sequence of states was found to hold for every member of this cluster. Individual members may still have their own transitions that don't generalize to the whole archetype."}</div>${archTransitionTags(d.transitions)}`);
+
 
   /* Members as rows */
   if(d.members&&d.members.length){
