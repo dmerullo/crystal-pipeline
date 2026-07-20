@@ -1,0 +1,1809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CRYSTAL Report</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;700;800&family=DM+Mono:wght@300;400&display=swap');
+:root{
+  --bg:#07080f;--surf:#10111c;--surf2:#161720;--border:#20212e;
+  --text:#dce2ea;--muted:#56547a;--accent:#4a9ee8;
+  --gap:#e0567a;--lit:#3fbf8f;--warn:#e8b84a;
+  --tscale:1;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'DM Mono',monospace;font-size:calc(13px * var(--tscale,1));line-height:1.6;padding:0 0 60px}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+header{background:var(--surf);border-bottom:1px solid var(--border);padding:28px 40px 24px;max-width:780px;margin:0 auto}
+.header-eyebrow{font-size:calc(9px * var(--tscale,1));letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.header-title{font-family:'DM Mono',monospace;font-size:calc(14px * var(--tscale,1));font-weight:400;color:var(--text);margin-bottom:16px;line-height:1.7;max-width:820px}
+
+
+.notice{max-width:780px;margin:20px auto;padding:10px 16px;border-left:3px solid var(--warn);background:rgba(201,176,126,.06);font-size:calc(10px * var(--tscale,1));color:var(--muted);border-radius:0 4px 4px 0}
+.notice strong{color:var(--warn)}
+
+.candidates{max-width:860px;margin:24px auto;padding:0 40px}
+
+.candidate{background:var(--surf);border:1px solid var(--border);border-radius:8px;margin-bottom:16px;overflow:hidden}
+.cand-header{display:flex;align-items:center;gap:12px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .1s}
+.cand-header:hover{background:var(--surf2)}
+.cand-num{width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--bg);font-size:calc(10px * var(--tscale,1));font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cand-title{font-family:'Sora',sans-serif;font-size:calc(14px * var(--tscale,1));font-weight:700;flex:1}
+.cand-toggle{color:var(--muted);font-size:calc(12px * var(--tscale,1));transition:transform .2s}
+.candidate.open .cand-toggle{transform:rotate(180deg)}
+.cand-body{display:none;padding:0 18px 18px;border-top:1px solid var(--border)}
+.candidate.open .cand-body{display:block}
+
+.badge{font-size:calc(8px * var(--tscale,1));letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:3px;flex-shrink:0}
+.badge.gap{background:rgba(201,126,126,.15);color:var(--gap);border:1px solid rgba(201,126,126,.3)}
+.badge.lit{background:rgba(126,201,160,.1);color:var(--lit);border:1px solid rgba(126,201,160,.25)}
+
+.section-label{font-size:calc(8px * var(--tscale,1));letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin:14px 0 6px}
+
+.arch-list{display:flex;flex-direction:column;gap:4px}
+.arch-row{display:flex;gap:8px;align-items:baseline;font-size:calc(10px * var(--tscale,1))}
+.arch-id{color:var(--muted);flex-shrink:0;width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.arch-label{color:var(--text)}
+
+.sv-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.sv-chip{background:var(--surf2);border:1px solid var(--border);border-radius:4px;padding:3px 8px;display:flex;gap:6px;font-size:calc(9px * var(--tscale,1))}
+.sv-dim{color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.sv-val{color:var(--accent)}
+
+.gap-list{display:flex;flex-direction:column;gap:5px}
+.gap-row{display:flex;align-items:center;gap:10px;font-size:calc(10px * var(--tscale,1));padding:5px 0;border-bottom:1px solid rgba(255,255,255,.03)}
+.gap-row:last-child{border-bottom:none}
+.gap-query{background:var(--surf2);padding:2px 6px;border-radius:3px;color:var(--text);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gap-status{flex-shrink:0;font-size:calc(9px * var(--tscale,1))}
+.gap-zero{color:var(--gap)}
+.gap-found{color:var(--lit)}
+.gap-broad{color:var(--warn)}
+.gap-error{color:var(--warn)}
+.gap-date{color:var(--muted);font-size:calc(9px * var(--tscale,1));flex-shrink:0}
+
+.synthesis{margin-top:14px;padding:12px 14px;background:rgba(126,184,201,.04);border-left:2px solid var(--accent);border-radius:0 4px 4px 0}
+.synthesis p{font-size:calc(11px * var(--tscale,1));color:var(--text);line-height:1.75}
+
+.ev-section{margin-top:12px}
+.ev-cats{display:flex;flex-direction:column;gap:4px;margin-top:4px}
+.ev-cat{border:1px solid var(--border);border-radius:5px;overflow:hidden}
+.ev-cat-header{display:flex;align-items:center;gap:8px;padding:7px 10px;cursor:pointer;background:var(--surf2);user-select:none;transition:background .1s}
+.ev-cat-header:hover{background:rgba(126,184,201,.08)}
+.ev-cat-label{font-size:calc(9px * var(--tscale,1));letter-spacing:.1em;text-transform:uppercase;color:var(--accent);flex:1}
+.ev-cat-count{font-size:calc(9px * var(--tscale,1));color:var(--muted);background:var(--border);border-radius:8px;padding:1px 6px}
+.ev-cat-body{display:none;padding:0}
+.ev-cat.open .ev-cat-body{display:block}
+.ev-cat.open .ev-toggle{transform:rotate(90deg)}
+.ev-stmt-row{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.04)}
+.ev-stmt-row:last-child{border-bottom:none}
+.ev-stmt{font-size:calc(10px * var(--tscale,1));color:var(--text);line-height:1.6;margin-bottom:4px}
+.ev-quote{font-size:calc(9px * var(--tscale,1));color:var(--muted);font-style:italic;border-left:2px solid var(--border);padding-left:8px;margin-bottom:6px;line-height:1.5}
+.ev-cit{margin-top:4px;cursor:pointer}
+.ev-cit-short{font-size:calc(9px * var(--tscale,1));color:var(--accent);display:flex;align-items:center;gap:4px}
+.ev-cit-detail{display:none;margin-top:5px;padding:6px 8px;background:var(--bg);border-radius:4px;border:1px solid var(--border)}
+.ev-cit.open .ev-cit-detail{display:block}
+.ev-cit.open .ev-toggle{transform:rotate(90deg)}
+.ev-cit-title{font-size:calc(9px * var(--tscale,1));color:var(--text);line-height:1.5;margin-bottom:3px}
+.ev-cit-journal{font-size:calc(9px * var(--tscale,1));color:var(--muted);margin-bottom:3px}
+.ev-cit-links{font-size:calc(9px * var(--tscale,1))}
+.ev-cit-links a{color:var(--accent);margin-right:6px}
+.ev-toggle{color:var(--muted);font-size:calc(8px * var(--tscale,1));transition:transform .2s;display:inline-block}
+.ev-ref{background:var(--surf2);border:1px solid var(--border);border-radius:3px;padding:1px 5px;font-size:calc(8px * var(--tscale,1));color:var(--muted);margin-right:3px;display:inline-block;margin-bottom:3px}
+footer{text-align:center;font-size:calc(9px * var(--tscale,1));color:var(--muted);margin-top:40px}
+
+.brand-row{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.logo-mark{height:36px;width:auto;flex-shrink:0}
+.brand-title{font-family:'Sora',sans-serif;font-size:calc(13px * var(--tscale,1));font-weight:800;letter-spacing:-.01em;color:var(--text);flex:1}
+.zoom-controls{display:flex;gap:4px;flex-shrink:0}
+.zoom-btn{background:var(--surf2);border:1px solid var(--border);color:var(--muted);border-radius:4px;padding:4px 10px;font-size:calc(11px * var(--tscale,1));cursor:pointer;font-family:'DM Mono',monospace;transition:color .15s,border-color .15s}
+.zoom-btn:hover{color:var(--accent);border-color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand-row">
+    <svg class="logo-mark" viewBox="0 0 100 70" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><polygon points="50,3 2,35 50,35" fill="#3d74ad"/><polygon points="50,3 50,35 98,35" fill="#eef4fb"/><polygon points="2,35 50,35 50,67" fill="#8fb8e0"/><polygon points="50,35 98,35 50,67" fill="#244b78"/><polygon points="50,3 2,35 50,67 98,35" fill="none" stroke="#16324f" stroke-width="1.4" stroke-linejoin="round"/><line x1="50" y1="3" x2="50" y2="67" stroke="#16324f" stroke-width="1" stroke-opacity="0.55"/><line x1="2" y1="35" x2="98" y2="35" stroke="#16324f" stroke-width="1" stroke-opacity="0.55"/></svg>
+    <div class="brand-title">CRYSTAL: A structured knowledge pipeline for scientific discovery</div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="adjustZoom(-1)">A−</button>
+      <button class="zoom-btn" onclick="adjustZoom(1)">A+</button>
+    </div>
+  </div>
+  <div class="header-eyebrow">Crystal Pipeline · Research Report</div>
+  <div class="header-title">Identify specific genes, proteins, or other discrete molecular targets — not brain regions, cell populations, or broad anatomical structures — that are mechanistically linked to vocal learning circuits and have not yet been studied in songbirds. Prioritize candidates a lab could directly manipulate experimentally, such as through knockdown, overexpression, or pharmacological targeting.</div>
+
+</header>
+
+<div class="notice">
+  <strong>Verification note</strong> — Gap claims are based on PubMed searches conducted at
+  report generation time. Topology claims are traceable to specific papers in the corpus
+  via evidence reference IDs. The LLM synthesis packages these verified claims;
+  it does not generate new ones.
+</div>
+
+<div class="candidates">
+
+<div class="candidate" id="cand-1">
+  <div class="cand-header" onclick="toggleCand('cand-1')">
+    <div class="cand-num">1</div>
+    <div class="cand-title">Srpx2</div>
+    <span class="badge gap">Gap confirmed</span>
+    <div class="cand-toggle">▾</div>
+  </div>
+  <div class="cand-body">
+    <div class="section-label">Structural position</div>
+    <div class="arch-list"><div class="arch-row"><span class="arch-id">C08</span><span class="arch-label">FOXP2-Linked Vocal Circuit Gene Regulation with Species-Limited Evidence</span></div></div>
+    <div class="sv-row"><div class="sv-chip"><span class="sv-dim">expression_level</span><span class="sv-val">reducible_by_knockdown</span></div><div class="sv-chip"><span class="sv-dim">regulatory_dependence</span><span class="sv-val">FoxP2_dependent</span></div><div class="sv-chip"><span class="sv-dim">pathway_characterization</span><span class="sv-val">partially_defined</span></div></div>
+    <div class="section-label" style="margin-top:12px">Gap verification</div>
+    <div class="gap-list"><div class="gap-row"><code class="gap-query">SRPX2 AND &quot;vocal learning&quot;</code><span class="gap-status gap-zero">0 results — gap confirmed</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">SRPX2 AND songbird</code><span class="gap-status gap-zero">0 results — gap confirmed</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">SRPX2 AND &quot;zebra finch&quot;</code><span class="gap-status gap-zero">0 results — gap confirmed</span><span class="gap-date">2026-07-14</span></div></div>
+    <div class="synthesis"><p>SRPX2 (sushi-repeat containing protein X-linked 2) is a secreted, X-linked protein that promotes synapse formation in cortical circuits. Its relevance to vocal learning stems directly from its position as a transcriptional target of FOXP2: cortical knockdown of SRPX2 in rodents reduces both synapse density and the production of ultrasonic vocalizations, placing it downstream of the same transcription factor whose disruption causes severe speech and language impairment in humans and whose manipulation alters song learning in zebra finches. Searches of PubMed for &quot;SRPX2 AND vocal learning,&quot; &quot;SRPX2 AND songbird,&quot; and &quot;SRPX2 AND zebra finch&quot; each return zero results as of July 14, 2026, confirming that this gene has not been studied in any avian vocal learner. Whether SRPX2 is expressed in song circuit nuclei such as Area X or HVC, and whether its synaptogenic activity there is required for song acquisition or maintenance, remains entirely unresolved — an answer would clarify how much of FOXP2's well-documented role in zebra finch song learning is mediated through downstream synaptic remodeling rather than transcriptional regulation alone.</p></div>
+    <div class="ev-section"><div class="section-label">Evidence</div><div class="ev-cats"><div class="ev-cat" id="cat-1-ATT">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-1-ATT').classList.toggle('open')">
+    <span class="ev-cat-label">Descriptive attributes</span>
+    <span class="ev-cat-count">3</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">SRPX2 encodes a secreted protein involved in synapse formation.</div>
+  <div class="ev-quote">&ldquo;SRPX2 (sushi-repeat containing protein X-linked 2), which encodes a secreted protein involved in synapse formation&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">SRPX2 functions downstream of FoxP2.</div>
+  <div class="ev-quote">&ldquo;Further characterization of SRPX2 function downstream of FoxP2 compared to FoxP2 regulation of other genes&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">SRPX2 is an X-linked gene (sushi-repeat containing protein X-linked 2).</div>
+  <div class="ev-quote">&ldquo;SRPX2 (sushi-repeat containing protein X-linked 2)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-1-REL">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-1-REL').classList.toggle('open')">
+    <span class="ev-cat-label">Relationships</span>
+    <span class="ev-cat-count">6</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">Reduction of SRPX2 leads to decreases in synapse formation through a Foxp2-dependent mechanism.</div>
+  <div class="ev-quote">&ldquo;Reduction of SRPX2 leads to decreases in synapse formation and USVs through a Foxp2-dependent mechanism&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Reduction of SRPX2 leads to decreases in ultrasonic vocalizations (USVs) through a Foxp2-dependent mechanism.</div>
+  <div class="ev-quote">&ldquo;Reduction of SRPX2 leads to decreases in synapse formation and USVs through a Foxp2-dependent mechanism&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 regulates expression of SRPX2 in cells.</div>
+  <div class="ev-quote">&ldquo;FOXP2 regulates expression of SRPX2 in cells&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">A patient-relevant mutation in FOXP2 can specifically affect FOXP2 regulation of SRPX2.</div>
+  <div class="ev-quote">&ldquo;a patient-relevant mutation in FOXP2 could specifically affect FOXP2 regulation of SRPX2&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Reduction of SRPX2 leads to decreases in synapse formation through a Foxp2-dependent mechanism.</div>
+  <div class="ev-quote">&ldquo;Reduction of SRPX2 leads to decreases in synapse formation and USVs through a Foxp2-dependent mechanism&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Reduction of SRPX2 leads to decreases in ultrasonic vocalizations (USVs) through a Foxp2-dependent mechanism.</div>
+  <div class="ev-quote">&ldquo;Reduction of SRPX2 leads to decreases in synapse formation and USVs through a Foxp2-dependent mechanism&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-1-DYN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-1-DYN').classList.toggle('open')">
+    <span class="ev-cat-label">Dynamics or change</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of SRPX2 in the cortex of rodents results in decreased synapse formation.</div>
+  <div class="ev-quote">&ldquo;knockdown of SRPX2 in the cortex of rodents was carried out ... Reduction of SRPX2 leads to decreases in synapse formation&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of SRPX2 in the cortex of rodents results in decreased USVs.</div>
+  <div class="ev-quote">&ldquo;knockdown of SRPX2 in the cortex of rodents was carried out ... Reduction of SRPX2 leads to decreases in synapse formation and USVs&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-1-TEN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-1-TEN').classList.toggle('open')">
+    <span class="ev-cat-label">Tensions and limitations</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The effects of SRPX2 reduction on synapse formation and USVs are Foxp2-dependent, implying the mechanism is constrained by Foxp2 activity.</div>
+  <div class="ev-quote">&ldquo;Reduction of SRPX2 leads to decreases in synapse formation and USVs through a Foxp2-dependent mechanism&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-1-MEM">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-1-MEM').classList.toggle('open')">
+    <span class="ev-cat-label">Membership or context</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">SRPX2 is part of a signaling pathway involving FoxP2 that was assessed in vivo by cortical knockdown in rodents.</div>
+  <div class="ev-quote">&ldquo;To directly assess the in vivo importance of this signaling pathway, knockdown of SRPX2 in the cortex of rodents was carried out&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-1-OBS">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-1-OBS').classList.toggle('open')">
+    <span class="ev-cat-label">Observed conditions</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The effects of SRPX2 reduction on synapse formation and USVs were observed following cortical knockdown in rodents.</div>
+  <div class="ev-quote">&ldquo;knockdown of SRPX2 in the cortex of rodents was carried out ... Reduction of SRPX2 leads to decreases in synapse formation and USVs through a Foxp2-dependent mechanism&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-1-GAP">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-1-GAP').classList.toggle('open')">
+    <span class="ev-cat-label">Evidence gaps</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The detailed molecular pathways involving SRPX2 function downstream of FoxP2, compared to FoxP2 regulation of other genes, have not yet been fully parsed out.</div>
+  <div class="ev-quote">&ldquo;Further characterization of SRPX2 function downstream of FoxP2 compared to FoxP2 regulation of other genes should begin to parse out in detail the molecular pathways at risk in ASD&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div></div></div>
+  </div>
+</div>
+<div class="candidate" id="cand-2">
+  <div class="cand-header" onclick="toggleCand('cand-2')">
+    <div class="cand-num">2</div>
+    <div class="cand-title">Foxp2</div>
+    <span class="badge lit">Literature exists</span>
+    <div class="cand-toggle">▾</div>
+  </div>
+  <div class="cand-body">
+    <div class="section-label">Structural position</div>
+    <div class="arch-list"><div class="arch-row"><span class="arch-id">C08</span><span class="arch-label">FOXP2-Linked Vocal Circuit Gene Regulation with Species-Limited Evidence</span></div></div>
+    <div class="sv-row"><div class="sv-chip"><span class="sv-dim">expression</span><span class="sv-val">developmentally_regulated</span></div><div class="sv-chip"><span class="sv-dim">cross_species_conservation</span><span class="sv-val">conserved_with_divergence</span></div><div class="sv-chip"><span class="sv-dim">loss_of_function_severity</span><span class="sv-val">graded_by_dosage</span></div><div class="sv-chip"><span class="sv-dim">research_establishment</span><span class="sv-val">intensively_studied</span></div></div>
+    <div class="section-label" style="margin-top:12px">Gap verification</div>
+    <div class="gap-list"><div class="gap-row"><code class="gap-query">FOXP2 AND &quot;vocal learning&quot;</code><span class="gap-status gap-found">61 results</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">FOXP2 AND songbird</code><span class="gap-status gap-found">74 results</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">FOXP2 AND &quot;zebra finch&quot;</code><span class="gap-status gap-found">25 results</span><span class="gap-date">2026-07-14</span></div></div>
+    <div class="synthesis"><p>FOXP2 is a forkhead-box transcription factor expressed in the striatum and cerebellum that is essential for vocal motor learning in both humans and songbirds, where it gates corticostriatal long-term potentiation and depression, modulates dopaminergic signaling in Area X, and regulates a downstream transcriptional program required for song acquisition. Its mechanistic centrality to vocal learning circuits is well-established: FOXP2 expression in Area X fluctuates with song practice in juvenile zebra finches, and knockdown of FOXP2 in Area X produces abnormal, poorly imitated syllables, directly linking its transcriptional activity to the sensorimotor learning process. With 74 results for &quot;FOXP2 AND songbird&quot; and 25 for &quot;FOXP2 AND zebra finch&quot; on PubMed as of July 14, 2026, FOXP2 is among the most intensively studied genes in the songbird vocal learning field and does not represent an understudied target. The open question that remains experimentally tractable is which specific FOXP2 transcriptional targets in Area X are the proximate effectors of corticostriatal plasticity during song learning — resolving this would shift the field from the regulator to the regulated, potentially revealing manipulable downstream nodes that mediate the synaptic changes FOXP2 orchestrates.</p></div>
+    <div class="ev-section"><div class="section-label">Evidence</div><div class="ev-cats"><div class="ev-cat" id="cat-2-REL">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-2-REL').classList.toggle('open')">
+    <span class="ev-cat-label">Relationships</span>
+    <span class="ev-cat-count">31</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 regulates genes implicated in ASD and/or schizophrenia.</div>
+  <div class="ev-quote">&ldquo;evidence for FOXP2 regulating genes implicated in ASD and/or schizophrenia (26, 90, 91)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 regulates expression of SRPX2 in cells.</div>
+  <div class="ev-quote">&ldquo;FOXP2 regulates expression of SRPX2 in cells&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">A patient-relevant mutation in FOXP2 can specifically affect FOXP2 regulation of SRPX2.</div>
+  <div class="ev-quote">&ldquo;a patient-relevant mutation in FOXP2 could specifically affect FOXP2 regulation of SRPX2 (109)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 has CNTNAP-2 as one of its interaction targets.</div>
+  <div class="ev-quote">&ldquo;One of FoxP2's interaction targets is contactin-associated protein2 (CNTNAP-2)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Brainard 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Translating birdsong: songbirds as a model for basic and applied medical research.</div>
+    <div class="ev-cit-journal">Annual review of neuroscience 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1146/annurev-neuro-060909-152826" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4130661/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23750515/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">CNTNAP-2, an interaction target of FOXP2, is a gene linked to autism and language impairment.</div>
+  <div class="ev-quote">&ldquo;One of FoxP2's interaction targets is contactin-associated protein2 (CNTNAP-2), a gene linked to autism and language impairment.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Brainard 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Translating birdsong: songbirds as a model for basic and applied medical research.</div>
+    <div class="ev-cit-journal">Annual review of neuroscience 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1146/annurev-neuro-060909-152826" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4130661/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23750515/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FoxP2-associated disruptions in song learning are associated with disruptions in dopaminergic sensitivity in striatal circuits.</div>
+  <div class="ev-quote">&ldquo;These behavioral disruptions in vocal production parallel disruptions associated with oral facial dyspraxia and are associated with disruptions in dopaminergic sensitivity in striatal circuits (78)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Heterozygous Foxp2 mice exhibit increased levels of extracellular dopamine in the striatum.</div>
+  <div class="ev-quote">&ldquo;Heterozygous Foxp2 mice exhibit decreased synaptic plasticity at corticostriatal synapses and increased levels of extracellular dopamine in the striatum.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Expression of human FOXP2 in the mouse is associated with decreased levels of extracellular dopamine.</div>
+  <div class="ev-quote">&ldquo;expression of human FOXP2 in the mouse is associated with increased synaptic plasticity at corticostriatal synapses, decreased levels of extracellular dopamine&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FoxP2 in Area X of zebra finches renders MSNs insensitive to dopamine receptor (DR1) agonists or antagonists.</div>
+  <div class="ev-quote">&ldquo;KD of FoxP2 in Area X of zebra finches renders MSNs insensitive to dopamine receptor (DR1) agonists or antagonists&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FoxP2 impacts vocal behavior by regulating postsynaptic dopaminergic signaling, synaptic plasticity, and the flow of signals through the striatum.</div>
+  <div class="ev-quote">&ldquo;These data indicate that FoxP2 impacts vocal behavior by regulating postsynaptic dopaminergic signaling, synaptic plasticity, and the flow of signals through the striatum.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FOXP2 in the songbird striatum disrupts the control of vocal variability by interfering with dopamine-dependent modulation.</div>
+  <div class="ev-quote">&ldquo;disrupts the control of vocal variability by interfering with dopamine-dependent modulation&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Mori 2015 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Songbird: a unique animal model for studying the molecular basis of disorders of vocal development and communication.</div>
+    <div class="ev-cit-journal">Experimental animals 2015</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1538/expanim.15-0008" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4547995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25912323/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Heterozygous Foxp2 mice exhibit decreased synaptic plasticity at corticostriatal synapses.</div>
+  <div class="ev-quote">&ldquo;Heterozygous Foxp2 mice exhibit decreased synaptic plasticity at corticostriatal synapses&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Expression of human FOXP2 in the mouse is associated with increased synaptic plasticity at corticostriatal synapses.</div>
+  <div class="ev-quote">&ldquo;expression of human FOXP2 in the mouse is associated with increased synaptic plasticity at corticostriatal synapses&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FoxP2 in Area X of zebra finches leads to decreased spine density on MSNs.</div>
+  <div class="ev-quote">&ldquo;KD of FoxP2 in Area X of zebra finches renders MSNs insensitive to dopamine receptor (DR1) agonists or antagonists, and leads to decreased spine density on MSNs.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FOXP2 in song striatum is accompanied by decreased spine density of striatal spiny neurons.</div>
+  <div class="ev-quote">&ldquo;Knockdown of FoxP2 in song striatum impairs song learning, is accompanied by decreased spine density of striatal spiny neurons&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Brainard 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Translating birdsong: songbirds as a model for basic and applied medical research.</div>
+    <div class="ev-cit-journal">Annual review of neuroscience 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1146/annurev-neuro-060909-152826" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4130661/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23750515/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FOXP2 in the songbird striatum decreases spine density of striatal spiny neurons.</div>
+  <div class="ev-quote">&ldquo;Knockdown of FoxP2 in the songbird striatum impairs song learning, decreases spine density of striatal spiny neurons&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Mori 2015 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Songbird: a unique animal model for studying the molecular basis of disorders of vocal development and communication.</div>
+    <div class="ev-cit-journal">Experimental animals 2015</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1538/expanim.15-0008" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4547995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25912323/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FoxP2 specifically in Area X disrupts song learning in juvenile birds.</div>
+  <div class="ev-quote">&ldquo;Knockdown of FoxP2 specifically in Area X disrupts song learning in juvenile birds&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FoxP2 specifically in Area X disrupts social context dependent modulation of song variability in adult birds.</div>
+  <div class="ev-quote">&ldquo;Knockdown of FoxP2 specifically in Area X disrupts song learning in juvenile birds and social context dependent modulation of song variability in adult birds (78, 80)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FoxP2 disrupts song development in songbirds in a manner that phenocopies disruptions seen in humans.</div>
+  <div class="ev-quote">&ldquo;Knockdown of FoxP2 disrupts song development in a manner that phenocopies disruptions seen in humans, indicating analogous circuit and gene regulatory mechanisms for song and speech development (77-83)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Humans and songbirds depend on the expression of FoxP2 for accurate vocal learning.</div>
+  <div class="ev-quote">&ldquo;Humans and songbird also depend on the expression of FoxP2, a transcription factor highly expressed in the striatum, for accurate vocal learning&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FoxP2 in Area X of young zebra finches causes an increase in vocal variability.</div>
+  <div class="ev-quote">&ldquo;knockdown (KD) of FoxP2 in Area X of young zebra finches, using hairpins against FoxP2 mRNA, causes an increase in vocal variability&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FoxP2 in Area X of young zebra finches prevents birds from accurately copying the song of their tutor.</div>
+  <div class="ev-quote">&ldquo;knockdown (KD) of FoxP2 in Area X of young zebra finches, using hairpins against FoxP2 mRNA, causes an increase in vocal variability and prevents birds from accurately copying the song of their tutor.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FOXP2 in song striatum impairs song learning in songbirds.</div>
+  <div class="ev-quote">&ldquo;Knockdown of FoxP2 in song striatum impairs song learning&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Brainard 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Translating birdsong: songbirds as a model for basic and applied medical research.</div>
+    <div class="ev-cit-journal">Annual review of neuroscience 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1146/annurev-neuro-060909-152826" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4130661/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23750515/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Knockdown of FOXP2 in the songbird striatum impairs song learning.</div>
+  <div class="ev-quote">&ldquo;Knockdown of FoxP2 in the songbird striatum impairs song learning&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Mori 2015 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Songbird: a unique animal model for studying the molecular basis of disorders of vocal development and communication.</div>
+    <div class="ev-cit-journal">Experimental animals 2015</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1538/expanim.15-0008" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4547995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25912323/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">'Humanized' Foxp2 mice containing two human-specific amino acids exhibit faster switching between declarative and procedural learning.</div>
+  <div class="ev-quote">&ldquo;These mice have changes in the complexity of USVs and also exhibit faster switching between declarative and procedural learning (100, 101)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Expression of human FOXP2 in the mouse is associated with enhanced transitions from declarative to procedural learning.</div>
+  <div class="ev-quote">&ldquo;expression of human FOXP2 in the mouse is associated with increased synaptic plasticity at corticostriatal synapses, decreased levels of extracellular dopamine, and enhanced transitions from declarative to procedural learning.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Foxp2 knockout in mice results in neonatal lethality.</div>
+  <div class="ev-quote">&ldquo;Foxp2 knockout (KO) mice are neonatal lethal&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Changes in FoxP2 sequence in bats do not appear to correlate with the evolution of laryngeal echolocation.</div>
+  <div class="ev-quote">&ldquo;there does not appear to be a correlation between changes in FoxP2 sequence and the evolution of laryngeal echolocation (47, 48)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Structural imaging of individuals with FOXP2 mutations has identified both increases and decreases in gray matter in several cortical regions associated with speech, including the STG and the inferior frontal gyrus.</div>
+  <div class="ev-quote">&ldquo;Structural imaging of individuals with FOXP2 mutations have identified both increases and decreases in gray matter in several cortical regions associated with speech such as the STG and the inferior frontal gyrus.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 mutations in affected KE family members and other individuals are not associated with strong cognitive deficit phenotypes, but there is evidence for lower than average cognitive performance.</div>
+  <div class="ev-quote">&ldquo;while the affected KE family members as well as other individuals with FOXP2 mutations do not exhibit strong cognitive deficit phenotypes there is evidence for these individuals to have lower than average cognitive performances&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">The reduced number of USVs in Foxp2KE/+ heterozygous mice can be rescued by expression of wild type FOXP2 in cerebellar Purkinje neurons.</div>
+  <div class="ev-quote">&ldquo;The reduced number of USVs in the Foxp2KE/+ heterozygous mice can be rescued by expression of wild type FOXP2 in cerebellar Purkinje neurons (95, 96)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-2-STA">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-2-STA').classList.toggle('open')">
+    <span class="ev-cat-label">State or condition</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 is dynamically regulated during development in songbirds.</div>
+  <div class="ev-quote">&ldquo;it is dynamically regulated during development and by adult behavioral state.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Brainard 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Translating birdsong: songbirds as a model for basic and applied medical research.</div>
+    <div class="ev-cit-journal">Annual review of neuroscience 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1146/annurev-neuro-060909-152826" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4130661/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23750515/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 is dynamically regulated by adult behavioral state in songbirds.</div>
+  <div class="ev-quote">&ldquo;it is dynamically regulated during development and by adult behavioral state.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Brainard 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Translating birdsong: songbirds as a model for basic and applied medical research.</div>
+    <div class="ev-cit-journal">Annual review of neuroscience 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1146/annurev-neuro-060909-152826" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4130661/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23750515/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-2-DYN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-2-DYN').classList.toggle('open')">
+    <span class="ev-cat-label">Dynamics or change</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 expression in the songbird striatum is regulated during vocal development.</div>
+  <div class="ev-quote">&ldquo;FoxP2 is expressed strongly in the striatum and is regulated during vocal development&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Mori 2015 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Songbird: a unique animal model for studying the molecular basis of disorders of vocal development and communication.</div>
+    <div class="ev-cit-journal">Experimental animals 2015</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1538/expanim.15-0008" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4547995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25912323/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-2-TEN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-2-TEN').classList.toggle('open')">
+    <span class="ev-cat-label">Tensions and limitations</span>
+    <span class="ev-cat-count">3</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">Foxp2 knockout is lethal in mice, limiting the study of complete loss-of-function effects postnatally.</div>
+  <div class="ev-quote">&ldquo;Foxp2 knockout (KO) mice are neonatal lethal&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Despite accelerated diversification of FoxP2 in bats, there is no apparent correlation between FoxP2 sequence changes and the evolution of laryngeal echolocation.</div>
+  <div class="ev-quote">&ldquo;while the FoxP2 gene (discussed below) has undergone accelerated diversification in bats, there does not appear to be a correlation between changes in FoxP2 sequence and the evolution of laryngeal echolocation (47, 48)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Structural imaging of individuals with FOXP2 mutations reveals both increases and decreases in gray matter, indicating bidirectional and region-specific effects.</div>
+  <div class="ev-quote">&ldquo;Structural imaging of individuals with FOXP2 mutations have identified both increases and decreases in gray matter in several cortical regions associated with speech such as the STG and the inferior frontal gyrus.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-2-ATT">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-2-ATT').classList.toggle('open')">
+    <span class="ev-cat-label">Descriptive attributes</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The FoxP2 gene has undergone accelerated diversification in bats.</div>
+  <div class="ev-quote">&ldquo;while the FoxP2 gene (discussed below) has undergone accelerated diversification in bats&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 expression in the cerebellum is limited to the Purkinje neurons.</div>
+  <div class="ev-quote">&ldquo;FOXP2 expression in the cerebellum is limited to the Purkinje neurons&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-2-GAP">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-2-GAP').classList.toggle('open')">
+    <span class="ev-cat-label">Evidence gaps</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The mechanism by which changes in FoxP2 sequence in bats relate to echolocation evolution is not established.</div>
+  <div class="ev-quote">&ldquo;there does not appear to be a correlation between changes in FoxP2 sequence and the evolution of laryngeal echolocation (47, 48)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-2-OBS">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-2-OBS').classList.toggle('open')">
+    <span class="ev-cat-label">Observed conditions</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">Rescue of reduced USVs in Foxp2KE/+ heterozygous mice was achieved specifically by expression of wild type FOXP2 in cerebellar Purkinje neurons.</div>
+  <div class="ev-quote">&ldquo;The reduced number of USVs in the Foxp2KE/+ heterozygous mice can be rescued by expression of wild type FOXP2 in cerebellar Purkinje neurons (95, 96)&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Animal Models of Speech and Vocal Communication Deficits Associated With Psychiatric Disorders.</div>
+    <div class="ev-cit-journal">Biological psychiatry 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.biopsych.2015.07.001" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4666779/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26232298/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div></div></div>
+  </div>
+</div>
+<div class="candidate" id="cand-3">
+  <div class="cand-header" onclick="toggleCand('cand-3')">
+    <div class="cand-num">3</div>
+    <div class="cand-title">Slit1</div>
+    <span class="badge lit">Literature exists</span>
+    <div class="cand-toggle">▾</div>
+  </div>
+  <div class="cand-body">
+    <div class="section-label">Structural position</div>
+    <div class="arch-list"><div class="arch-row"><span class="arch-id">C08</span><span class="arch-label">FOXP2-Linked Vocal Circuit Gene Regulation with Species-Limited Evidence</span></div></div>
+    <div class="sv-row"><div class="sv-chip"><span class="sv-dim">regional_expression_level</span><span class="sv-val">down-regulated in vocal-learning motor regions</span></div><div class="sv-chip"><span class="sv-dim">cross_species_conservation</span><span class="sv-val">vocal-learner-specific pattern</span></div><div class="sv-chip"><span class="sv-dim">regulatory_context</span><span class="sv-val">FOXP2-targeted, human-biased upregulation</span></div></div>
+    <div class="section-label" style="margin-top:12px">Gap verification</div>
+    <div class="gap-list"><div class="gap-row"><code class="gap-query">SLIT1 AND &quot;vocal learning&quot;</code><span class="gap-status gap-found">2 results</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">SLIT1 AND songbird</code><span class="gap-status gap-found">2 results</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">SLIT1 AND &quot;zebra finch&quot;</code><span class="gap-status gap-found">1 result</span><span class="gap-date">2026-07-14</span></div></div>
+    <div class="synthesis"><p>SLIT1 is a secreted axon guidance ligand that signals through the ROBO1 receptor to repel axonal processes, thereby determining which long-range motor projections can form during neural circuit development. Its relevance to vocal learning circuits is mechanistically grounded in FOXP2 regulation: FOXP2 transcriptionally targets SLIT1, and comparative genomic work shows that human FOXP2 drives stronger SLIT1 upregulation than chimpanzee FOXP2, while vocal motor regions in songbirds, parrots, and humans all show convergent down-regulation of SLIT1 relative to vocal non-learners — a pattern consistent with the hypothesis that suppressing ROBO1-mediated axonal repulsion is necessary to permit the direct cortico-motor neuron projections that underlie learned vocalization. A search for &quot;SLIT1 AND songbird&quot; returns only 2 published results as of July 14, 2026, and &quot;SLIT1 AND zebra finch&quot; returns a single result, confirming that no functional investigation of SLIT1 in the songbird vocal circuit has been published. Whether SLIT1 down-regulation in song motor nuclei is causally required for the formation of direct forebrain-to-motor projections — or is merely correlated with the vocal-learner phenotype — remains entirely unresolved, and answering this question would clarify whether FOXP2's role in shaping vocal circuits operates through axon guidance suppression as a core mechanism.</p></div>
+    <div class="ev-section"><div class="section-label">Evidence</div><div class="ev-cats"><div class="ev-cat" id="cat-3-REL">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-REL').classList.toggle('open')">
+    <span class="ev-cat-label">Relationships</span>
+    <span class="ev-cat-count">3</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">Binding of SLIT1 to ROBO1 causes repulsion of axonal processes from cell bodies.</div>
+  <div class="ev-quote">&ldquo;binding of SLIT1 to ROBO1 causes repulsion of the axonal processes from cell bodies&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP2 shows lower expression in the dLMC region, where SLIT1 is also down-regulated.</div>
+  <div class="ev-quote">&ldquo;SLIT1 promoter is a target of the FOXP2 transcription factor, and FOXP2 showed lower expression in the dLMC region&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 is more differentially up-regulated by the human FOXP2 transcription factor than by the chimpanzee FOXP2.</div>
+  <div class="ev-quote">&ldquo;SLIT1 was found to be more differentially up-regulated by the human FOXP2 transcription factor than by the chimpanzee FOXP2&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-ATT">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-ATT').classList.toggle('open')">
+    <span class="ev-cat-label">Descriptive attributes</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The SLIT1 promoter is a target of the FOXP2 transcription factor.</div>
+  <div class="ev-quote">&ldquo;SLIT1 promoter is a target of the FOXP2 transcription factor&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-SIG">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-SIG').classList.toggle('open')">
+    <span class="ev-cat-label">Significance or relevance</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">Down-regulation of SLIT1 in RA and LMC is hypothesized to represent a permissive mechanism allowing unique direct projections to vocal motor neurons to form.</div>
+  <div class="ev-quote">&ldquo;we hypothesize that the down-regulation of SLIT1 and other neural connectivity genes in RA and LMC may represent a permissive mechanism to allow certain neural connections to form, such as the unique direct projection to vocal motor neurons&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-MEM">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-MEM').classList.toggle('open')">
+    <span class="ev-cat-label">Membership or context</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 is among the neural connectivity genes down-regulated in RA and LMC across vocal-learning species.</div>
+  <div class="ev-quote">&ldquo;the down-regulation of SLIT1 and other neural connectivity genes in RA and LMC&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-DYN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-DYN').classList.toggle('open')">
+    <span class="ev-cat-label">Dynamics or change</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 down-regulation in vocal-learning birds is verified and species-specific, absent in vocal-nonlearning species.</div>
+  <div class="ev-quote">&ldquo;showed verified down-regulation in the RA analog of all vocal-learning bird species, but no down-regulation in the arcopallium of the vocal-nonlearning species&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-STA">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-STA').classList.toggle('open')">
+    <span class="ev-cat-label">State or condition</span>
+    <span class="ev-cat-count">5</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 is down-regulated in the RA analog of all vocal-learning bird species examined.</div>
+  <div class="ev-quote">&ldquo;showed verified down-regulation in the RA analog of all vocal-learning bird species&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 shows no down-regulation in the arcopallium of vocal-nonlearning bird species.</div>
+  <div class="ev-quote">&ldquo;no down-regulation in the arcopallium of the vocal-nonlearning species&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Only the core portion of the parrot RA analog shows SLIT1 down-regulation.</div>
+  <div class="ev-quote">&ldquo;Only the core portion of the parrot RA analog showed SLIT1 down-regulation&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 does not show differential expression in the ventral premotor region (area 6v) of nonhuman primates.</div>
+  <div class="ev-quote">&ldquo;this region is not required for vocalization and did not show differential expression of SLIT1&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 is partially down-regulated in the adjacent mAC of zebra finches.</div>
+  <div class="ev-quote">&ldquo;it was also partially down-regulated in the adjacent mAC of zebra finches&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-TEN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-TEN').classList.toggle('open')">
+    <span class="ev-cat-label">Tensions and limitations</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 down-regulation in the parrot RA analog is restricted to only the core portion, not the full region.</div>
+  <div class="ev-quote">&ldquo;Only the core portion of the parrot RA analog showed SLIT1 down-regulation&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">The ventral premotor region (area 6v) in nonhuman primates, despite being a hypothesized precursor to the human LMC, does not show differential SLIT1 expression and is not required for vocalization.</div>
+  <div class="ev-quote">&ldquo;unlike vocal-learning birds and humans, this region is not required for vocalization and did not show differential expression of SLIT1&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-OBS">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-OBS').classList.toggle('open')">
+    <span class="ev-cat-label">Observed conditions</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">SLIT1 differential expression was assessed in the ventral premotor region (area 6v) of nonhuman primates, a region hypothesized as a precursor to the human primary LMC.</div>
+  <div class="ev-quote">&ldquo;a ventral premotor region (area 6v) is hypothesized to be a precursor of the human primary LMC and makes an indirect connection to vocal motor neurons in the brainstem, however, unlike vocal-learning birds and humans, this region is not required for vocalization and did not show differential expression of SLIT1&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-3-GAP">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-3-GAP').classList.toggle('open')">
+    <span class="ev-cat-label">Evidence gaps</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The hypothesis that SLIT1 down-regulation is a permissive mechanism for direct vocal motor neuron projections remains unconfirmed.</div>
+  <div class="ev-quote">&ldquo;we hypothesize that the down-regulation of SLIT1 and other neural connectivity genes in RA and LMC may represent a permissive mechanism to allow certain neural connections to form&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Pfenning 2014 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Convergent transcriptional specializations in the brains of humans and song-learning birds.</div>
+    <div class="ev-cit-journal">Science (New York, N.Y.) 2014</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1126/science.1256846" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4385736/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/25504733/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div></div></div>
+  </div>
+</div>
+<div class="candidate" id="cand-4">
+  <div class="cand-header" onclick="toggleCand('cand-4')">
+    <div class="cand-num">4</div>
+    <div class="cand-title">Lhx9</div>
+    <span class="badge gap">Gap confirmed</span>
+    <div class="cand-toggle">▾</div>
+  </div>
+  <div class="cand-body">
+    <div class="section-label">Structural position</div>
+    <div class="arch-list"><div class="arch-row"><span class="arch-id">C09</span><span class="arch-label">Spatiotemporal Gene Expression Restriction Driving Pallial Regional Identity</span></div></div>
+    <div class="sv-row"><div class="sv-chip"><span class="sv-dim">expression_domain</span><span class="sv-val">region_restricted</span></div><div class="sv-chip"><span class="sv-dim">temporal_stage</span><span class="sv-val">post_ED6_to_adult</span></div><div class="sv-chip"><span class="sv-dim">expression_level</span><span class="sv-val">downregulated_in_adult_RA</span></div></div>
+    <div class="section-label" style="margin-top:12px">Gap verification</div>
+    <div class="gap-list"><div class="gap-row"><code class="gap-query">LHX9 AND &quot;vocal learning&quot;</code><span class="gap-status gap-zero">0 results — gap confirmed</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">LHX9 AND songbird</code><span class="gap-status gap-found">2 results</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">LHX9 AND &quot;zebra finch&quot;</code><span class="gap-status gap-found">2 results</span><span class="gap-date">2026-07-14</span></div></div>
+    <div class="synthesis"><p>LHX9 is a LIM-homeodomain transcription factor that acts as a regional identity determinant in the developing avian pallium, expressed broadly across the pallial ventricular zone at embryonic day 4 before progressively restricting to the caudal-lateral ventricle fold from ED6 onward, where it maintains continuous expression physically linking hippocampal and arcopallial precursor zones through at least postnatal day 1. Its relevance to vocal learning circuits lies in this spatiotemporal restriction: LHX9 expression is actively downregulated specifically within the anterior arcopallium—the territory that gives rise to the robust nucleus of the arcopallium (RA), the premotor output nucleus of the song system—between P1 and adulthood, while remaining stable in non-pallial regions such as the dorsal thalamus and optic tectum, suggesting LHX9 shutdown may be a necessary step in the developmental specification or maturation of RA identity. A search for LHX9 AND songbird and LHX9 AND &quot;zebra finch&quot; each return only 2 published results as of 2026-07-14, and a search for LHX9 AND &quot;vocal learning&quot; returns zero results, confirming that the functional role of this transcription factor in song system development has not been investigated. Whether the timing of LHX9 downregulation in the anterior arcopallium is causally linked to RA circuit assembly—and what transcriptional program it gates or represses during that window—remains entirely unresolved, with direct implications for understanding how a generic pallial progenitor territory acquires the specialized connectivity of a premotor vocal nucleus.</p></div>
+    <div class="ev-section"><div class="section-label">Evidence</div><div class="ev-cats"><div class="ev-cat" id="cat-4-SIG">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-SIG').classList.toggle('open')">
+    <span class="ev-cat-label">Significance or relevance</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 serves as an expression marker distinguishing specific pallial regions including the future hippocampus and arcopallium.</div>
+  <div class="ev-quote">&ldquo;The expression markers for these regions, the LHX9 and ER81 transcription factors... a region of high continuous LHX9 expression was restricted around the caudal-lateral ventricle fold, with the dorsal part (R3) later becoming the hippocampus and the ventral part (R6) later becoming the arcopallium.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">The continuity of LHX9 expression between hippocampus and arcopallium regions provides evidence for a developmental relationship between these two structures.</div>
+  <div class="ev-quote">&ldquo;This continuity between hippocampus and arcopallium LHX9 expression could be easily seen in medial to lateral sections from ED6 to P1.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-REL">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-REL').classList.toggle('open')">
+    <span class="ev-cat-label">Relationships</span>
+    <span class="ev-cat-count">5</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression in the dorsal part of the caudal-lateral ventricle fold (R3) is associated with the region that later becomes the hippocampus.</div>
+  <div class="ev-quote">&ldquo;with the dorsal part (R3) later becoming the hippocampus&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression in the ventral part of the caudal-lateral ventricle fold (R6) is associated with the region that later becomes the arcopallium.</div>
+  <div class="ev-quote">&ldquo;the ventral part (R6) later becoming the arcopallium&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression overlaps with EMX2 and PAX6 expression in the pallial ventricular zone at ED4.</div>
+  <div class="ev-quote">&ldquo;there was high expression throughout the pallial ventricular zone that overlapped with the EMX2 and PAX6 expression region&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 shows differential expression relative to EMX2 in adult RA, with LHX9 downregulated and EMX2 expressed slightly higher.</div>
+  <div class="ev-quote">&ldquo;EMX2 was expressed slightly higher and LHX9 down regulated in adult RA relative to the surrounding arcopallium&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 and EMX2 show comparable differential expression in a topologically similar position from ED12 to P1.</div>
+  <div class="ev-quote">&ldquo;here we noted comparable differential expression of these two genes in a topologically similar position from ED12 to P1&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-DYN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-DYN').classList.toggle('open')">
+    <span class="ev-cat-label">Dynamics or change</span>
+    <span class="ev-cat-count">4</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression first appears at ED4 and is initially broadly distributed in the pallial ventricular zone, then becomes restricted to the caudal-lateral ventricle fold from ED6 onward.</div>
+  <div class="ev-quote">&ldquo;already appeared at ED4. For LHX9, there was high expression throughout the pallial ventricular zone... But from ED6 onward a region of high continuous LHX9 expression was restricted around the caudal-lateral ventricle fold&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">The continuity of LHX9 expression between hippocampus and arcopallium regions is visible in medial to lateral sections from ED6 to P1.</div>
+  <div class="ev-quote">&ldquo;This continuity between hippocampus and arcopallium LHX9 expression could be easily seen in medial to lateral sections from ED6 to P1.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression in the anterior arcopallium nucleus is shut down sometime between P1 and adulthood.</div>
+  <div class="ev-quote">&ldquo;Sometime between P1 to adulthood, LHX9 expression was shut down in the anterior arcopallium nucleus.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression in the dorsal thalamus and optic tectum remains consistent from embryonic development through adulthood.</div>
+  <div class="ev-quote">&ldquo;LHX9 expression in other brain areas, such as the dorsal thalamus, optic tectum, was consistent throughout embryonic development to adulthood.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-STA">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-STA').classList.toggle('open')">
+    <span class="ev-cat-label">State or condition</span>
+    <span class="ev-cat-count">3</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">From ED6 onward, high continuous LHX9 expression becomes restricted to the region around the caudal-lateral ventricle fold.</div>
+  <div class="ev-quote">&ldquo;from ED6 onward a region of high continuous LHX9 expression was restricted around the caudal-lateral ventricle fold&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression is shut down in the anterior arcopallium nucleus sometime between P1 and adulthood.</div>
+  <div class="ev-quote">&ldquo;Sometime between P1 to adulthood, LHX9 expression was shut down in the anterior arcopallium nucleus.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 is downregulated in adult RA relative to the surrounding arcopallium.</div>
+  <div class="ev-quote">&ldquo;EMX2 was expressed slightly higher and LHX9 down regulated in adult RA relative to the surrounding arcopallium&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-OBS">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-OBS').classList.toggle('open')">
+    <span class="ev-cat-label">Observed conditions</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 expression continuity between hippocampus and arcopallium was observed in medial to lateral sections from ED6 to P1.</div>
+  <div class="ev-quote">&ldquo;This continuity between hippocampus and arcopallium LHX9 expression could be easily seen in medial to lateral sections from ED6 to P1.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Differential LHX9 and EMX2 expression in a topologically similar position was noted from ED12 to P1.</div>
+  <div class="ev-quote">&ldquo;here we noted comparable differential expression of these two genes in a topologically similar position from ED12 to P1&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-ATT">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-ATT').classList.toggle('open')">
+    <span class="ev-cat-label">Descriptive attributes</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 shows high expression throughout the pallial ventricular zone at ED4, overlapping with EMX2 and PAX6 expression regions.</div>
+  <div class="ev-quote">&ldquo;For LHX9, there was high expression throughout the pallial ventricular zone that overlapped with the EMX2 and PAX6 expression region.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-TEN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-TEN').classList.toggle('open')">
+    <span class="ev-cat-label">Tensions and limitations</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The precise timing of LHX9 expression shutdown in the anterior arcopallium nucleus is not determined beyond the window of P1 to adulthood.</div>
+  <div class="ev-quote">&ldquo;Sometime between P1 to adulthood, LHX9 expression was shut down in the anterior arcopallium nucleus.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-GAP">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-GAP').classList.toggle('open')">
+    <span class="ev-cat-label">Evidence gaps</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The exact timepoint at which LHX9 expression is shut down in the anterior arcopallium nucleus between P1 and adulthood is not specified.</div>
+  <div class="ev-quote">&ldquo;Sometime between P1 to adulthood, LHX9 expression was shut down in the anterior arcopallium nucleus.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-4-MEM">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-4-MEM').classList.toggle('open')">
+    <span class="ev-cat-label">Membership or context</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">LHX9 is expressed in the dorsal thalamus and optic tectum in addition to pallial regions.</div>
+  <div class="ev-quote">&ldquo;LHX9 expression in other brain areas, such as the dorsal thalamus, optic tectum, was consistent throughout embryonic development to adulthood.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div></div></div>
+  </div>
+</div>
+<div class="candidate" id="cand-5">
+  <div class="cand-header" onclick="toggleCand('cand-5')">
+    <div class="cand-num">5</div>
+    <div class="cand-title">Foxp1</div>
+    <span class="badge lit">Literature exists</span>
+    <div class="cand-toggle">▾</div>
+  </div>
+  <div class="cand-body">
+    <div class="section-label">Structural position</div>
+    <div class="arch-list"><div class="arch-row"><span class="arch-id">C08</span><span class="arch-label">FOXP2-Linked Vocal Circuit Gene Regulation with Species-Limited Evidence</span></div><div class="arch-row"><span class="arch-id">C09</span><span class="arch-label">Spatiotemporal Gene Expression Restriction Driving Pallial Regional Identity</span></div></div>
+    <div class="sv-row"><div class="sv-chip"><span class="sv-dim">expression_level</span><span class="sv-val">region_enriched</span></div><div class="sv-chip"><span class="sv-dim">developmental_stage</span><span class="sv-val">adult</span></div><div class="sv-chip"><span class="sv-dim">spatial_distribution</span><span class="sv-val">mesopallium_and_striatum</span></div><div class="sv-chip"><span class="sv-dim">functional_integrity</span><span class="sv-val">haploinsufficiency_sensitive</span></div></div>
+    <div class="section-label" style="margin-top:12px">Gap verification</div>
+    <div class="gap-list"><div class="gap-row"><code class="gap-query">FOXP1 AND &quot;vocal learning&quot;</code><span class="gap-status gap-found">14 results</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">FOXP1 AND songbird</code><span class="gap-status gap-found">20 results</span><span class="gap-date">2026-07-14</span></div><div class="gap-row"><code class="gap-query">FOXP1 AND &quot;zebra finch&quot;</code><span class="gap-status gap-found">11 results</span><span class="gap-date">2026-07-14</span></div></div>
+    <div class="synthesis"><p>FOXP1 is a transcription factor that, in the avian brain, is expressed in a region-enriched pattern defining the mesopallium and ranking among the most abundant striatal-enriched genes, where it regulates downstream gene networks with haploinsufficiency sensitivity — meaning a single functional copy is insufficient to maintain normal behavior and striatal transcriptional programs. Its relevance to vocal learning circuits is mechanistically grounded in its close paralog relationship with FOXP2: FOXP1 and FOXP2 are known to heterodimerize and co-regulate transcriptional targets in basal ganglia circuits, yet their individual versus combined contributions to the Area X-projecting striatal pathways that gate song learning remain entirely undissected. Searches for FOXP1 AND songbird return 20 published results, FOXP1 AND &quot;zebra finch&quot; return 11, and FOXP1 AND &quot;vocal learning&quot; return 14 as of July 2026 — a literature thin enough that no study has directly manipulated FOXP1 expression within song circuit nuclei to assess its role in song acquisition or maintenance. Whether FOXP1 haploinsufficiency in Area X or the mesopallium disrupts the striatal gene regulatory networks required for vocal plasticity — independently of FOXP2 — is an open question whose answer would clarify how much of the FOXP2 vocal learning phenotype is actually mediated through FOXP1-dependent co-regulatory mechanisms.</p></div>
+    <div class="ev-section"><div class="section-label">Evidence</div><div class="ev-cats"><div class="ev-cat" id="cat-5-ATT">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-ATT').classList.toggle('open')">
+    <span class="ev-cat-label">Descriptive attributes</span>
+    <span class="ev-cat-count">4</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 is a transcription factor used as a marker to identify the mesopallium.</div>
+  <div class="ev-quote">&ldquo;This link was best revealed by the marker that we used to identify the mesopallium, the FOXP1 transcription factor.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 is among a group of 71 significant recurrent de novo mutations associated with ASD.</div>
+  <div class="ev-quote">&ldquo;FOXP1 is among the group of 71 significant recurrent de novo mutations associated with ASD&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 is a stably expressed gene in the mesopallium, distinguishing it from non-mesopallium stably expressed genes.</div>
+  <div class="ev-quote">&ldquo;The FOXP1 developmental pattern was not seen with non-mesopallium stably expressed genes.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">In mouse, Foxp1 is one of the 100 most abundant striatal-enriched genes.</div>
+  <div class="ev-quote">&ldquo;In the mouse, Foxp1 is one of the 100 most abundant striatal-enriched genes&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-SIG">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-SIG').classList.toggle('open')">
+    <span class="ev-cat-label">Significance or relevance</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 serves as the key marker used to identify and track the developmental origin and boundaries of the mesopallium.</div>
+  <div class="ev-quote">&ldquo;This link was best revealed by the marker that we used to identify the mesopallium, the FOXP1 transcription factor.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Studies dissecting the distinct and overlapping contributions of FoxP1 and FoxP2 to basal ganglia function are expected to be informative for understanding vocal communication.</div>
+  <div class="ev-quote">&ldquo;Future studies that dissect out the distinct and overlapping contributions of FoxP1 and FoxP2 to basal ganglia function should be informative for understanding vocal communication&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-MEM">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-MEM').classList.toggle('open')">
+    <span class="ev-cat-label">Membership or context</span>
+    <span class="ev-cat-count">2</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 expression is associated with the mesopallium in the telencephalon.</div>
+  <div class="ev-quote">&ldquo;This link was best revealed by the marker that we used to identify the mesopallium, the FOXP1 transcription factor.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 is situated within the context of ASD-associated de novo mutations.</div>
+  <div class="ev-quote">&ldquo;FOXP1 is among the group of 71 significant recurrent de novo mutations associated with ASD&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-DYN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-DYN').classList.toggle('open')">
+    <span class="ev-cat-label">Dynamics or change</span>
+    <span class="ev-cat-count">5</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 expression transitions from undetectable differential high expression (ED4–ED6) to high differential expression in a dorsal pallial strip (ED8).</div>
+  <div class="ev-quote">&ldquo;From ED4-ED6, there was no detectable differential high expression of FOXP1 in the telencephalon. By ED8, high differential FOXP1 expression occurred in the pallium in a strip of cells in R1 above the medial half of the ventricle.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Between ED8 and ED10, the anterior part of the FOXP1-expressing dorsal pallial region enlarges and begins extending into the DVR.</div>
+  <div class="ev-quote">&ldquo;By ED10, the anterior part of this dorsal pallial region proliferated (enlarged) and began to extend into the DVR in front of the ventricle.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Between ED10 and ED12, the anterior part of the FOXP1 region wraps around the ventricle and becomes a caudal portion of the DVR.</div>
+  <div class="ev-quote">&ldquo;By ED12, the anterior part of the FOXP1 region wrapped around the ventricle and turned into a caudal portion of the DVR.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">From P1 to P6, the two FOXP1-expressing areas begin to take on adult shapes.</div>
+  <div class="ev-quote">&ldquo;After hatching, from P1 to P6 the two FOXP1 expressing areas were still in the dorsal and ventral pallium above and below the ventricle, and began to take on the adult shapes.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">By adulthood, the FOXP1 expression seal around the ventricle is complete and extends far anteriorly near the venicula blood vessel.</div>
+  <div class="ev-quote">&ldquo;By adulthood, the seal was complete and extended so far anterior near the venicula blood vessel at the brain's surface that we could barely detect the FOXP1 continuity around LMI.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-REL">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-REL').classList.toggle('open')">
+    <span class="ev-cat-label">Relationships</span>
+    <span class="ev-cat-count">8</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">Patient-relevant haploinsufficient Foxp1 mice exhibit dysregulation of known ASD and Foxp2 target genes in the striatum.</div>
+  <div class="ev-quote">&ldquo;patient-relevant haploinsuffienct Foxp1 mice exhibit altered vocal communication, dysregulation of known ASD and Foxp2 target genes in the striatum&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Patient-relevant haploinsufficient Foxp1 mice exhibit changes in medium spiny neuron excitability.</div>
+  <div class="ev-quote">&ldquo;patient-relevant haploinsuffienct Foxp1 mice exhibit... changes in medium spiny neuron excitability&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Dysfunction of Foxp1 is likely to have a significant impact on the striatum, given its high abundance there.</div>
+  <div class="ev-quote">&ldquo;Foxp1 is one of the 100 most abundant striatal-enriched genes, and therefore, its dysfunction is likely to have a significant impact on that structure&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Patient-relevant haploinsufficient Foxp1 mice exhibit altered vocal communication.</div>
+  <div class="ev-quote">&ldquo;patient-relevant haploinsuffienct Foxp1 mice exhibit altered vocal communication&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Brain-wide deletion of Foxp1 in mouse results in autism-relevant behaviors.</div>
+  <div class="ev-quote">&ldquo;Brain-wide deletion of Foxp1 in mouse results in autism-relevant behaviors&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">FOXP1 has distinct and overlapping contributions with FoxP2 to basal ganglia function.</div>
+  <div class="ev-quote">&ldquo;Future studies that dissect out the distinct and overlapping contributions of FoxP1 and FoxP2 to basal ganglia function&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Brain-wide deletion of Foxp1 in mouse results in autism-relevant behaviors.</div>
+  <div class="ev-quote">&ldquo;Brain-wide deletion of Foxp1 in mouse results in autism-relevant behaviors&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div><div class="ev-stmt-row">
+  <div class="ev-stmt">Patient-relevant haploinsufficient Foxp1 mice exhibit altered vocal communication.</div>
+  <div class="ev-quote">&ldquo;patient-relevant haploinsuffienct Foxp1 mice exhibit altered vocal communication&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-STA">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-STA').classList.toggle('open')">
+    <span class="ev-cat-label">State or condition</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">In adults, FOXP1 continuity around LMI is barely detectable due to how far anterior the seal extends near the venicula blood vessel.</div>
+  <div class="ev-quote">&ldquo;By adulthood, the seal was complete and extended so far anterior near the venicula blood vessel at the brain's surface that we could barely detect the FOXP1 continuity around LMI.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-TEN">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-TEN').classList.toggle('open')">
+    <span class="ev-cat-label">Tensions and limitations</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">By adulthood, FOXP1 continuity around LMI is barely detectable due to the extent of anterior expansion near the venicula blood vessel.</div>
+  <div class="ev-quote">&ldquo;By adulthood, the seal was complete and extended so far anterior near the venicula blood vessel at the brain's surface that we could barely detect the FOXP1 continuity around LMI.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-OBS">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-OBS').classList.toggle('open')">
+    <span class="ev-cat-label">Observed conditions</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The FOXP1 developmental pattern was compared against non-mesopallium stably expressed genes as a control.</div>
+  <div class="ev-quote">&ldquo;The FOXP1 developmental pattern was not seen with non-mesopallium stably expressed genes.&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Chen 2013 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Molecular profiling of the developing avian telencephalon: regional timing and brain subdivision continuities.</div>
+    <div class="ev-cit-journal">The Journal of comparative neurology 2013</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1002/cne.23406" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3863995/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/23818174/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div><div class="ev-cat" id="cat-5-GAP">
+  <div class="ev-cat-header" onclick="document.getElementById('cat-5-GAP').classList.toggle('open')">
+    <span class="ev-cat-label">Evidence gaps</span>
+    <span class="ev-cat-count">1</span>
+    <span class="ev-toggle">▸</span>
+  </div>
+  <div class="ev-cat-body"><div class="ev-stmt-row">
+  <div class="ev-stmt">The distinct and overlapping contributions of FoxP1 and FoxP2 to basal ganglia function have not yet been fully dissected.</div>
+  <div class="ev-quote">&ldquo;Future studies that dissect out the distinct and overlapping contributions of FoxP1 and FoxP2 to basal ganglia function should be informative for understanding vocal communication&rdquo;</div>
+  <div class="ev-cit" onclick="this.classList.toggle('open')">
+  <span class="ev-cit-short">Konopka 2016 <span class="ev-toggle">▸</span></span>
+  <div class="ev-cit-detail">
+    <div class="ev-cit-title">Insights into the Neural and Genetic Basis of Vocal Communication.</div>
+    <div class="ev-cit-journal">Cell 2016</div>
+    <div class="ev-cit-links"><a href="https://doi.org/10.1016/j.cell.2016.02.039" target="_blank">DOI</a> · <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC4788808/" target="_blank">PMC</a> · <a href="https://pubmed.ncbi.nlm.nih.gov/26967292/" target="_blank">PubMed</a></div>
+  </div>
+</div>
+</div></div>
+</div></div></div>
+  </div>
+</div>
+</div>
+
+<footer>Crystal · 2026-07-14 01:59 UTC</footer>
+
+<script>
+function toggleCand(id){
+  const el=document.getElementById(id);
+  el.classList.toggle('open');
+}
+// Open first candidate by default
+const first=document.querySelector('.candidate');
+if(first)first.classList.add('open');
+
+let zoomStep=2;
+const zoomScales=[0.85,0.92,1.0,1.15,1.3];
+function adjustZoom(dir){
+  zoomStep=Math.max(0,Math.min(zoomScales.length-1,zoomStep+dir));
+  document.documentElement.style.setProperty('--tscale',zoomScales[zoomStep]);
+}
+</script>
+</body>
+</html>
